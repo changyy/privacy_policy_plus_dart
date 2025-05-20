@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025-05-20
+### Changed
+- Updated README documentation to clarify the usage and behavior of `skipRegionList` and `onlyRegionList` parameters with improved comments and examples.
+
 ## [1.0.1] - 2025-05-20
 ### Changed
 - Changed `getDeviceCountryCode()` to use `ui.PlatformDispatcher.instance.locale` instead of the deprecated `ui.window.locale` for better compatibility with Flutter 3.7+.

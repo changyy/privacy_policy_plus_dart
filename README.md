@@ -48,8 +48,6 @@ MaterialApp(
     rejectText: 'Exit',
     titleText: 'Privacy Policy',
     snackBarOpenLinkText: 'Open link',
-    skipRegionList: const ['US', 'CA'], // Optional: skip in these regions
-    onlyRegionList: const ['TW', 'JP'], // Optional: show only in these regions
     onAccept: () {
       navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomePage()),
@@ -72,8 +70,6 @@ MaterialApp(
 - `acceptText`/`rejectText`: button text
 - `titleText`: page title
 - `snackBarOpenLinkText`: snackbar text for link
-- `skipRegionList`: List<String>? (region/country code to skip)
-- `onlyRegionList`: List<String>? (region/country code to force show)
 - `sharedPrefKey`: String (key for shared_preferences, default: 'app_prviacy_accept_data')
 - `onAccept`: callback when user accepts (default: pop or do nothing if cannot pop)
 - `onReject`: callback when user rejects (default: pop)
@@ -89,8 +85,26 @@ final accepted = await PrivacyPolicyPage.isAccepted();
 ```dart
 final shouldShow = PrivacyPolicyPage.shouldShowPrivacyPage(
   region: countryCode,
-  skipRegionList: const ['US', 'CA'],
-  onlyRegionList: const ['TW', 'JP'],
+  skipRegionList: const ['US', 'CA'], // Will skip privacy page in these regions
+);
+```
+
+```dart
+final shouldShow = PrivacyPolicyPage.shouldShowPrivacyPage(
+  region: countryCode,
+  onlyRegionList: const ['TW', 'JP'], // Will only show privacy page in these regions
+);
+```
+
+```dart
+final shouldShow = PrivacyPolicyPage.shouldSkipPrivacyPageByDevice(
+  skipRegionList: const ['US', 'CA'], // Will skip privacy page in these regions
+);
+```
+
+```dart
+final shouldShow = PrivacyPolicyPage.shouldSkipPrivacyPageByDevice(
+  onlyRegionList: const ['TW', 'JP'], // Will only show privacy page in these regions
 );
 ```
 
