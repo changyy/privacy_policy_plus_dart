@@ -1,5 +1,5 @@
 name: privacy_policy_plus
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/changyy/privacy_policy_plus_dart
 description: >
   A Flutter package to quickly display a customizable privacy policy page, with region skip/force logic and shared_preferences integration.

@@ -3,20 +3,18 @@ import 'package:privacy_policy_plus/privacy_policy_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // 假設你有一個取得 country code 的方法
-  String? countryCode = await getUserCountryCode();
-  final shouldShow = PrivacyPolicyPage.shouldShowPrivacyPage(
-    region: countryCode,
+  // 直接用 shouldShowPrivacyPageByDevice 取得是否顯示
+  final shouldShowRule =
+      !(await PrivacyPolicyPage.shouldSkipPrivacyPageByDevice(
     skipRegionList: const ['US', 'CA'], // 範例：美國、加拿大不顯示
-    onlyRegionList: const ['TW', 'JP'], // 範例：僅台灣、日本顯示
-  );
-  final accepted = await PrivacyPolicyPage.isAccepted();
-  runApp(MyApp(showPolicy: shouldShow && !accepted));
-}
+  ));
+  //final shouldShowRule2 =
+  //    !(await PrivacyPolicyPage.shouldSkipPrivacyPageByDevice(
+  //  onlyRegionList: const ['TW', 'JP'], // 範例：僅台灣、日本顯示
+  //));
 
-Future<String?> getUserCountryCode() async {
-  // TODO: 實際專案請用 geolocator、device_info_plus、ip api 等取得
-  return null; // 預設 null 代表未知
+  final accepted = await PrivacyPolicyPage.isAccepted();
+  runApp(MyApp(showPolicy: shouldShowRule && !accepted));
 }
 
 // 在檔案最上方加上 navigatorKey
@@ -48,8 +46,6 @@ class MyApp extends StatelessWidget {
               rejectText: 'Exit',
               titleText: 'Privacy Policy',
               snackBarOpenLinkText: 'Open link',
-              skipRegionList: const ['US', 'CA'],
-              onlyRegionList: const ['TW', 'JP'],
               onAccept: () {
                 // 預設跳轉到 Home 頁面
                 // 需使用 navigatorKey 來取得 context

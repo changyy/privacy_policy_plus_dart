@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,9 +17,6 @@ class PrivacyPolicyPage extends StatelessWidget {
   final VoidCallback? onReject;
   final String? titleText;
   final String? snackBarOpenLinkText;
-  final List<String>? skipRegionList;
-  final List<String>? forceShowRegionList;
-  final List<String>? onlyRegionList;
 
   const PrivacyPolicyPage({
     Key? key,
@@ -36,9 +34,6 @@ class PrivacyPolicyPage extends StatelessWidget {
     this.onReject,
     this.titleText = 'Privacy Policy',
     this.snackBarOpenLinkText = 'Open link',
-    this.skipRegionList,
-    this.forceShowRegionList,
-    this.onlyRegionList,
   }) : super(key: key);
 
   static Future<bool> isAccepted(
@@ -47,14 +42,25 @@ class PrivacyPolicyPage extends StatelessWidget {
     return prefs.getBool(key) ?? false;
   }
 
+  /// 判斷是否應該跳過隱私頁（不顯示）
+  ///
+  /// - region: 當前地區代碼（如 'US', 'TW'）
+  /// - skipRegionList: 不顯示的地區清單（可選）
+  /// - onlyRegionList: 僅顯示的地區清單（可選）
+  ///
+  /// 規則：
+  /// 1. 若 onlyRegionList 有定義，僅在該清單內才顯示，其餘都跳過
+  /// 2. 若 skipRegionList 有定義，該清單內則不顯示
+  /// 3. 兩者皆未定義則預設顯示
   static bool shouldSkipPrivacyPage({
     required String? region,
     List<String>? skipRegionList,
-    List<String>? forceShowRegionList,
+    List<String>? onlyRegionList,
   }) {
     if (region == null) return false;
-    if (forceShowRegionList != null && forceShowRegionList.contains(region))
-      return false;
+    if (onlyRegionList != null) {
+      return !(onlyRegionList.contains(region));
+    }
     if (skipRegionList != null && skipRegionList.contains(region)) return true;
     return false;
   }
@@ -90,6 +96,34 @@ class PrivacyPolicyPage extends StatelessWidget {
     }
     // 預設顯示
     return true;
+  }
+
+  /// 取得裝置的國家/地區代碼（僅推測，非 GPS/IP 精確）
+  static Future<String?> getDeviceCountryCode() async {
+    try {
+      // Flutter 3.7+ 建議用 PlatformDispatcher 取代 window
+      final locale = ui.PlatformDispatcher.instance.locale;
+      return locale.countryCode?.toUpperCase();
+    } catch (_) {}
+    return null;
+  }
+
+  /// 自動取得裝置地區，並判斷是否應該跳過隱私頁
+  ///
+  /// - skipRegionList: 不顯示的地區清單（可選）
+  /// - onlyRegionList: 僅顯示的地區清單（可選）
+  ///
+  /// 回傳 true 表示應該跳過（不顯示）
+  static Future<bool> shouldSkipPrivacyPageByDevice({
+    List<String>? skipRegionList,
+    List<String>? onlyRegionList,
+  }) async {
+    final region = await getDeviceCountryCode();
+    return shouldSkipPrivacyPage(
+      region: region,
+      skipRegionList: skipRegionList,
+      onlyRegionList: onlyRegionList,
+    );
   }
 
   @override
