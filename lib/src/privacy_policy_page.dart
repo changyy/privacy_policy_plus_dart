@@ -18,6 +18,10 @@ class PrivacyPolicyPage extends StatelessWidget {
   final String? titleText;
   final String? snackBarOpenLinkText;
 
+  // 🆕 Version control mechanism
+  final String?
+      policyVersion; // Privacy policy version/date, e.g. "2025-08-03" or "v1.2.0"
+
   const PrivacyPolicyPage({
     Key? key,
     required this.policyItems,
@@ -34,24 +38,62 @@ class PrivacyPolicyPage extends StatelessWidget {
     this.onReject,
     this.titleText = 'Privacy Policy',
     this.snackBarOpenLinkText = 'Open link',
+    this.policyVersion, // 🆕 Privacy policy version control
   }) : super(key: key);
 
-  static Future<bool> isAccepted(
-      {String key = 'app_prviacy_accept_data'}) async {
+  /// Check if privacy policy has been accepted (legacy API, maintains backward compatibility)
+  static Future<bool> isAccepted({
+    String key = 'app_prviacy_accept_data',
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(key) ?? false;
   }
 
-  /// 判斷是否應該跳過隱私頁（不顯示）
+  /// 🆕 Check if specific version of privacy policy has been accepted
   ///
-  /// - region: 當前地區代碼（如 'US', 'TW'）
-  /// - skipRegionList: 不顯示的地區清單（可選）
-  /// - onlyRegionList: 僅顯示的地區清單（可選）
+  /// - [currentPolicyVersion]: Current privacy policy version
+  /// - [key]: SharedPreferences storage key
   ///
-  /// 規則：
-  /// 1. 若 onlyRegionList 有定義，僅在該清單內才顯示，其餘都跳過
-  /// 2. 若 skipRegionList 有定義，該清單內則不顯示
-  /// 3. 兩者皆未定義則預設顯示
+  /// Returns true if user has accepted the exact same privacy policy version
+  static Future<bool> isAcceptedForVersion({
+    required String currentPolicyVersion,
+    String key = 'app_prviacy_accept_data',
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Check for versioned acceptance record
+    final versionKey = '${key}_version';
+    final acceptedVersion = prefs.getString(versionKey);
+
+    if (acceptedVersion == null) {
+      // If no version record exists, check legacy boolean acceptance record
+      // Legacy users will be prompted to re-confirm (due to no explicit version record)
+      return prefs.getBool(key) ?? false;
+    }
+
+    // 🎯 Simple string comparison: versions must be exactly the same to be considered accepted
+    return acceptedVersion == currentPolicyVersion;
+  }
+
+  /// 🆕 Get the privacy policy version that user has accepted
+  static Future<String?> getAcceptedVersion({
+    String key = 'app_prviacy_accept_data',
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final versionKey = '${key}_version';
+    return prefs.getString(versionKey);
+  }
+
+  /// Determine whether to skip privacy page (do not display)
+  ///
+  /// - region: Current region code (e.g. 'US', 'TW')
+  /// - skipRegionList: List of regions to not display (optional)
+  /// - onlyRegionList: List of regions to only display (optional)
+  ///
+  /// Rules:
+  /// 1. If onlyRegionList is defined, only display in those regions, skip all others
+  /// 2. If skipRegionList is defined, do not display in those regions
+  /// 3. If neither is defined, default to display
   static bool shouldSkipPrivacyPage({
     required String? region,
     List<String>? skipRegionList,
@@ -65,55 +107,97 @@ class PrivacyPolicyPage extends StatelessWidget {
     return false;
   }
 
-  static Future<void> setAccepted(
-      {String key = 'app_prviacy_accept_data'}) async {
+  /// Set privacy policy as accepted (legacy API, maintains backward compatibility)
+  static Future<void> setAccepted({
+    String key = 'app_prviacy_accept_data',
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, true);
   }
 
-  /// 決定是否顯示隱私權頁面
+  /// 🆕 Set specific version of privacy policy as accepted
   ///
-  /// - region: 當前地區代碼（如 'US', 'TW'）
-  /// - skipRegionList: 不顯示的地區清單（可選）
-  /// - onlyRegionList: 僅顯示的地區清單（可選）
+  /// - [policyVersion]: Accepted privacy policy version
+  /// - [key]: SharedPreferences storage key
+  static Future<void> setAcceptedForVersion({
+    required String policyVersion,
+    String key = 'app_prviacy_accept_data',
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Set both legacy and new records to ensure backward compatibility
+    await prefs.setBool(key, true);
+
+    // Record version information
+    final versionKey = '${key}_version';
+    await prefs.setString(versionKey, policyVersion);
+
+    // Record acceptance timestamp
+    final timestampKey = '${key}_accepted_at';
+    await prefs.setString(timestampKey, DateTime.now().toIso8601String());
+  }
+
+  /// 🆕 Get the time when user accepted privacy policy
+  static Future<DateTime?> getAcceptedAt({
+    String key = 'app_prviacy_accept_data',
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final timestampKey = '${key}_accepted_at';
+    final timestamp = prefs.getString(timestampKey);
+
+    if (timestamp != null) {
+      try {
+        return DateTime.parse(timestamp);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Determine whether to show privacy page
   ///
-  /// 規則：
-  /// 1. 若 onlyRegionList 有定義，僅在該清單內才顯示
-  /// 2. 若 skipRegionList 有定義，該清單內則不顯示
-  /// 3. 兩者皆未定義則預設顯示
+  /// - region: Current region code (e.g. 'US', 'TW')
+  /// - skipRegionList: List of regions to not display (optional)
+  /// - onlyRegionList: List of regions to only display (optional)
+  ///
+  /// Rules:
+  /// 1. If onlyRegionList is defined, only display in those regions
+  /// 2. If skipRegionList is defined, do not display in those regions
+  /// 3. If neither is defined, default to display
   static bool shouldShowPrivacyPage({
     required String? region,
     List<String>? skipRegionList,
     List<String>? onlyRegionList,
   }) {
     if (onlyRegionList != null) {
-      // 只允許 onlyRegionList 內的地區顯示
+      // Only allow display in onlyRegionList regions
       return region != null && onlyRegionList.contains(region);
     }
     if (skipRegionList != null) {
-      // 跳過 skipRegionList 內的地區
+      // Skip regions in skipRegionList
       return !(region != null && skipRegionList.contains(region));
     }
-    // 預設顯示
+    // Default to display
     return true;
   }
 
-  /// 取得裝置的國家/地區代碼（僅推測，非 GPS/IP 精確）
+  /// Get device country/region code (estimation only, not GPS/IP accurate)
   static Future<String?> getDeviceCountryCode() async {
     try {
-      // Flutter 3.7+ 建議用 PlatformDispatcher 取代 window
+      // Flutter 3.7+ recommends using PlatformDispatcher instead of window
       final locale = ui.PlatformDispatcher.instance.locale;
       return locale.countryCode?.toUpperCase();
     } catch (_) {}
     return null;
   }
 
-  /// 自動取得裝置地區，並判斷是否應該跳過隱私頁
+  /// Automatically get device region and determine if privacy page should be skipped
   ///
-  /// - skipRegionList: 不顯示的地區清單（可選）
-  /// - onlyRegionList: 僅顯示的地區清單（可選）
+  /// - skipRegionList: List of regions to not display (optional)
+  /// - onlyRegionList: List of regions to only display (optional)
   ///
-  /// 回傳 true 表示應該跳過（不顯示）
+  /// Returns true if should skip (not display)
   static Future<bool> shouldSkipPrivacyPageByDevice({
     List<String>? skipRegionList,
     List<String>? onlyRegionList,
@@ -128,7 +212,7 @@ class PrivacyPolicyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // region 可由外部決定傳入，這裡假設外部已判斷
+    // Region can be determined externally, assuming external logic has already decided
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
       body: SafeArea(
@@ -170,20 +254,28 @@ class PrivacyPolicyPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ...policyItems.map((item) => Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.only(top: 6.0),
-                                    child: Icon(Icons.brightness_1,
-                                        size: 10, color: Colors.deepPurple),
+                          ...policyItems.map(
+                            (item) => Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 6.0),
+                                  child: Icon(
+                                    Icons.brightness_1,
+                                    size: 10,
+                                    color: Colors.deepPurple,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                      child: Text(item,
-                                          style: TextStyle(fontSize: 16))),
-                                ],
-                              )),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    item,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           if (privacyLink != null && privacyTitle != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 16.0),
@@ -192,8 +284,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                                 child: Text(
                                   privacyTitle!,
                                   style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline),
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ),
@@ -205,8 +298,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                                 child: Text(
                                   termsTitle!,
                                   style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline),
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ),
@@ -218,8 +312,10 @@ class PrivacyPolicyPage extends StatelessWidget {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 32.0, horizontal: 32.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 32.0,
+                horizontal: 32.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -230,14 +326,24 @@ class PrivacyPolicyPage extends StatelessWidget {
                       elevation: 0,
                     ),
                     onPressed: () async {
-                      await setAccepted(key: sharedPrefKey);
+                      // 🆕 Choose storage method based on whether version info is provided
+                      if (policyVersion != null) {
+                        await setAcceptedForVersion(
+                          policyVersion: policyVersion!,
+                          key: sharedPrefKey,
+                        );
+                      } else {
+                        // Legacy compatibility mode
+                        await setAccepted(key: sharedPrefKey);
+                      }
+
                       if (onAccept != null) {
                         onAccept!();
                       } else {
                         if (Navigator.canPop(context)) {
                           Navigator.of(context).pop(true);
                         }
-                        // 若不能 pop，則不做事，交由外部控制
+                        // If cannot pop, do nothing, let external control handle it
                       }
                     },
                     child: Text(acceptText),
@@ -262,7 +368,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   void _launchUrl(BuildContext context, String url) {
-    // TODO: 可用 url_launcher 實作
+    // TODO: Can implement with url_launcher
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${snackBarOpenLinkText ?? 'Open link'}: $url')),
     );

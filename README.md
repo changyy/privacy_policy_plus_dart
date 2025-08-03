@@ -4,15 +4,15 @@
 
 [![Demo](https://raw.githubusercontent.com/changyy/privacy_policy_plus_dart/main/example/assets/screenshot320.png)](https://pub.dev/packages/privacy_policy_plus)
 
-A flexible, beautiful, and developer-friendly Flutter widget for displaying privacy policy and consent screens. Easily integrate privacy compliance into your app with customizable UI, country-based logic, and quick setup.
+A flexible, beautiful, and developer-friendly Flutter widget for displaying privacy policy and consent screens. Easily integrate privacy compliance into your app with customizable UI, country-based logic, and version control.
 
 ## Features
-- Show privacy policy and terms consent page with one line of code
+- One-line privacy policy and terms consent page
+- **Version control** for policy updates with automatic re-consent
 - Customizable app icon, policy items, and button actions
-- Support for privacy/terms links
-- Enable/skip by country list (region code)
-- Easy integration and extensible for any Flutter app
-- Built-in shared_preferences support for consent persistence
+- Privacy/terms links with built-in navigation
+- Region-based display logic (skip/show by country)
+- Built-in shared_preferences persistence
 
 ## Getting Started
 
@@ -20,98 +20,86 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  privacy_policy_plus: ^1.0.0
+  privacy_policy_plus: ^1.1.1
 ```
 
-Import and use in your app:
+## Quick Start
 
 ```dart
 import 'package:privacy_policy_plus/privacy_policy_plus.dart';
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+// Check if current policy version is accepted
+final accepted = await PrivacyPolicyPage.isAcceptedForVersion(
+  currentPolicyVersion: '2025-08-03',
+);
 
-MaterialApp(
-  navigatorKey: navigatorKey,
-  home: PrivacyPolicyPage(
-    topIcon: Image.asset('assets/app_icon.png', width: 100, height: 100),
-    backgroundColor: Color(0xFFFCF7FF),
+if (!accepted) {
+  // Show privacy policy with version control
+  PrivacyPolicyPage(
+    policyVersion: '2025-08-03', // Auto version tracking
     policyItems: const [
-      'This app does not collect your personal data.',
-      'This app uses Firebase for anonymous usage analytics.',
-      'This app uses Admob for advertising services.',
+      'This app collects usage analytics.',
+      'Data is stored locally only.',
     ],
-    privacyLink: 'https://your.privacy.link',
-    privacyTitle: 'Privacy Policy Link',
-    termsLink: 'https://your.terms.link',
-    termsTitle: 'Terms of Service Link',
-    acceptText: 'Accept',
-    rejectText: 'Exit',
-    titleText: 'Privacy Policy',
-    snackBarOpenLinkText: 'Open link',
-    onAccept: () {
-      navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomePage()),
-        (route) => false,
-      );
-    },
-    onReject: () {
-      // Custom reject action
-    },
-  ),
+    onAccept: () => Navigator.pushReplacement(...),
+  );
+}
+```
+
+## Basic Usage
+
+```dart
+PrivacyPolicyPage(
+  topIcon: Icon(Icons.privacy_tip, size: 64),
+  backgroundColor: Colors.grey[100],
+  policyItems: const [
+    'This app does not collect personal data.',
+    'Analytics are anonymous and optional.',
+  ],
+  privacyLink: 'https://example.com/privacy',
+  privacyTitle: 'Full Privacy Policy',
+  acceptText: 'I Agree',
+  rejectText: 'Exit',
+  policyVersion: '1.0.0', // Enable version control
+)
+```
+
+## API Reference
+
+### Version Control Methods
+```dart
+// Check specific version acceptance
+await PrivacyPolicyPage.isAcceptedForVersion(currentPolicyVersion: '1.0.0');
+
+// Get accepted version
+await PrivacyPolicyPage.getAcceptedVersion();
+
+// Get acceptance timestamp
+await PrivacyPolicyPage.getAcceptedAt();
+```
+
+### Region Logic
+```dart
+// Skip in specific regions
+PrivacyPolicyPage.shouldShowPrivacyPage(
+  region: 'US',
+  skipRegionList: ['US', 'CA'],
+);
+
+// Show only in specific regions
+PrivacyPolicyPage.shouldShowPrivacyPage(
+  region: 'TW', 
+  onlyRegionList: ['TW', 'JP'],
 );
 ```
 
-## API
-- `topIcon`: Widget? (your app icon)
-- `backgroundColor`: Color? (background color)
-- `policyItems`: List<String> (privacy terms, required)
-- `privacyLink`/`privacyTitle`: privacy policy link & title
-- `termsLink`/`termsTitle`: terms of service link & title
-- `acceptText`/`rejectText`: button text
-- `titleText`: page title
-- `snackBarOpenLinkText`: snackbar text for link
-- `sharedPrefKey`: String (key for shared_preferences, default: 'app_prviacy_accept_data')
-- `onAccept`: callback when user accepts (default: pop or do nothing if cannot pop)
-- `onReject`: callback when user rejects (default: pop)
-
-### Consent Check Example
-
-```dart
-final accepted = await PrivacyPolicyPage.isAccepted();
-```
-
-### Region Logic Example
-
-```dart
-final shouldShow = PrivacyPolicyPage.shouldShowPrivacyPage(
-  region: countryCode,
-  skipRegionList: const ['US', 'CA'], // Will skip privacy page in these regions
-);
-```
-
-```dart
-final shouldShow = PrivacyPolicyPage.shouldShowPrivacyPage(
-  region: countryCode,
-  onlyRegionList: const ['TW', 'JP'], // Will only show privacy page in these regions
-);
-```
-
-```dart
-final shouldShow = PrivacyPolicyPage.shouldSkipPrivacyPageByDevice(
-  skipRegionList: const ['US', 'CA'], // Will skip privacy page in these regions
-);
-```
-
-```dart
-final shouldShow = PrivacyPolicyPage.shouldSkipPrivacyPageByDevice(
-  onlyRegionList: const ['TW', 'JP'], // Will only show privacy page in these regions
-);
-```
+### Key Parameters
+- `policyVersion`: String? - Enable version control
+- `policyItems`: List<String> - Privacy terms (required)
+- `topIcon`: Widget? - App icon
+- `privacyLink`/`termsLink`: External links
+- `onAccept`/`onReject`: Custom callbacks
 
 ## License
 MIT
-
----
-
-**privacy_policy_plus** helps you stay compliant and user-friendly, with minimal code and maximum flexibility.
 

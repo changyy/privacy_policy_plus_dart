@@ -30,8 +30,11 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       home: showPolicy
           ? PrivacyPolicyPage(
-              topIcon:
-                  Image.asset('assets/app_icon.png', width: 100, height: 100),
+              topIcon: Image.asset(
+                'assets/app_icon.png',
+                width: 100,
+                height: 100,
+              ),
               backgroundColor: const Color(0xFFFCF7FF),
               policyItems: const [
                 'This app does not collect your personal data.',
@@ -67,8 +70,6 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: const Center(child: Text('App Home Page')),
-    );
+    return Scaffold(body: const Center(child: Text('App Home Page')));
   }
 }
