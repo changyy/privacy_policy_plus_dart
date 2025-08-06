@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2025-08-06
+### Added
+- Text color customization properties for better foreground/background contrast control
+- `titleTextColor` property to customize the privacy policy title text color
+- `contentTextColor` property to customize policy item text and bullet point colors
+- `linkTextColor` property to customize privacy policy and terms of service link colors
+
+### Fixed
+- Resolved text visibility issues when using custom background colors
+- Improved text contrast for better readability across different theme configurations
+
 ## [1.1.2] - 2025-08-03
 ### Added
 - Version control mechanism for privacy policy updates

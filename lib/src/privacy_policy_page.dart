@@ -18,6 +18,11 @@ class PrivacyPolicyPage extends StatelessWidget {
   final String? titleText;
   final String? snackBarOpenLinkText;
 
+  // 🎨 Text styling
+  final Color? titleTextColor;
+  final Color? contentTextColor;
+  final Color? linkTextColor;
+
   // 🆕 Version control mechanism
   final String?
       policyVersion; // Privacy policy version/date, e.g. "2025-08-03" or "v1.2.0"
@@ -38,6 +43,10 @@ class PrivacyPolicyPage extends StatelessWidget {
     this.onReject,
     this.titleText = 'Privacy Policy',
     this.snackBarOpenLinkText = 'Open link',
+    // 🎨 Text styling parameters
+    this.titleTextColor,
+    this.contentTextColor,
+    this.linkTextColor,
     this.policyVersion, // 🆕 Privacy policy version control
   }) : super(key: key);
 
@@ -231,10 +240,11 @@ class PrivacyPolicyPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       titleText ?? 'Privacy Policy',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: titleTextColor ?? Colors.white,
+                              ),
                     ),
                     const SizedBox(height: 24),
                     Container(
@@ -258,19 +268,24 @@ class PrivacyPolicyPage extends StatelessWidget {
                             (item) => Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 6.0),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6.0),
                                   child: Icon(
                                     Icons.brightness_1,
                                     size: 10,
-                                    color: Colors.deepPurple,
+                                    color:
+                                        contentTextColor ?? Colors.deepPurple,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     item,
-                                    style: TextStyle(fontSize: 16),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color:
+                                          contentTextColor ?? Colors.grey[800],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -284,7 +299,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                                 child: Text(
                                   privacyTitle!,
                                   style: TextStyle(
-                                    color: Colors.blue,
+                                    color: linkTextColor ?? Colors.blue,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
@@ -298,7 +313,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                                 child: Text(
                                   termsTitle!,
                                   style: TextStyle(
-                                    color: Colors.blue,
+                                    color: linkTextColor ?? Colors.blue,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
