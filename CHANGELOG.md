@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2025-11-10
+### Fixed
+- **Locale Normalization**: Enhanced locale matching to support various format variations
+  - BCP 47 format with hyphens (e.g., `zh-TW`, `en-US`) now correctly maps to internal format
+  - Lowercase variants (e.g., `zh-tw`, `en-us`) are now properly recognized
+  - Mixed case formats (e.g., `zh_tw`, `EN_US`) are automatically normalized
+  - Script codes (e.g., `zh-Hans-TW`, `zh-Hant-CN`) are intelligently parsed
+- **Improved Locale Resolution**: Fixed locale matching issues in both `PrivacyPolicyLocalization.getLocalization()` and `PolicyItem.getText()` methods
+  - Prevents incorrect fallback to English when localized content is available
+  - Ensures consistent behavior across different locale input formats
+  - Maintains full backward compatibility with existing code
+
+### Technical Details
+- Added `_normalizeLocale()` method to standardize locale strings before matching
+- Enhanced fallback logic to normalize both target and fallback locales
+- All locale strings are now converted to a consistent `language_COUNTRY` format internally
+
 ## [1.2.0] - 2025-11-10
 ### Added
 - **Hierarchical Policy Structure**: New `policyItemsHierarchical` parameter supporting multi-level nested policy items
