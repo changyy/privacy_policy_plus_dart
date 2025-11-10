@@ -1,54 +1,91 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'policy_item.dart';
+import 'privacy_policy_localization.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
-  final List<String> policyItems;
+  // === Legacy API (for backward compatibility) ===
+  final List<String>? policyItems;
+
+  // === New hierarchical API ===
+  final List<PolicyItem>? policyItemsHierarchical;
+
+  // === Common parameters ===
   final Widget? topIcon;
   final Color? backgroundColor;
   final String sharedPrefKey;
   final String? privacyLink;
-  final String? privacyTitle;
   final String? termsLink;
-  final String? termsTitle;
-  final String acceptText;
-  final String rejectText;
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
-  final String? titleText;
-  final String? snackBarOpenLinkText;
 
-  // 🎨 Text styling
+  // === Text styling ===
   final Color? titleTextColor;
   final Color? contentTextColor;
   final Color? linkTextColor;
 
-  // 🆕 Version control mechanism
-  final String?
-      policyVersion; // Privacy policy version/date, e.g. "2025-08-03" or "v1.2.0"
+  // === Version control mechanism ===
+  final String? policyVersion;
+
+  // === Localization parameters ===
+  /// Locale for displaying policy content and UI text
+  /// If null, automatically detects from device locale
+  /// Format: 'en', 'zh_TW', 'zh_CN', 'ja', etc.
+  final String? locale;
+
+  /// Fallback locale when target locale is not found
+  /// Default: 'en'
+  final String fallbackLocale;
+
+  /// Custom localization for UI elements (buttons, titles, etc.)
+  /// If null, uses built-in localizations based on locale
+  final PrivacyPolicyLocalization? localization;
+
+  // === Legacy text parameters (override localization) ===
+  final String? titleText;
+  final String? acceptText;
+  final String? rejectText;
+  final String? privacyTitle;
+  final String? termsTitle;
+  final String? snackBarOpenLinkText;
 
   const PrivacyPolicyPage({
     Key? key,
-    required this.policyItems,
+    // Legacy API
+    this.policyItems,
+    // New API
+    this.policyItemsHierarchical,
+    // Common parameters
     this.topIcon,
     this.backgroundColor,
     this.sharedPrefKey = 'app_prviacy_accept_data',
     this.privacyLink,
-    this.privacyTitle,
     this.termsLink,
-    this.termsTitle,
-    this.acceptText = 'Accept',
-    this.rejectText = 'Exit',
     this.onAccept,
     this.onReject,
-    this.titleText = 'Privacy Policy',
-    this.snackBarOpenLinkText = 'Open link',
-    // 🎨 Text styling parameters
+    // Text styling
     this.titleTextColor,
     this.contentTextColor,
     this.linkTextColor,
-    this.policyVersion, // 🆕 Privacy policy version control
-  }) : super(key: key);
+    // Version control
+    this.policyVersion,
+    // Localization
+    this.locale,
+    this.fallbackLocale = 'en',
+    this.localization,
+    // Legacy text parameters
+    this.titleText,
+    this.acceptText,
+    this.rejectText,
+    this.privacyTitle,
+    this.termsTitle,
+    this.snackBarOpenLinkText,
+  })  : assert(
+          policyItems != null || policyItemsHierarchical != null,
+          'Either policyItems or policyItemsHierarchical must be provided',
+        ),
+        super(key: key);
 
   /// Check if privacy policy has been accepted (legacy API, maintains backward compatibility)
   static Future<bool> isAccepted({
@@ -58,33 +95,23 @@ class PrivacyPolicyPage extends StatelessWidget {
     return prefs.getBool(key) ?? false;
   }
 
-  /// 🆕 Check if specific version of privacy policy has been accepted
-  ///
-  /// - [currentPolicyVersion]: Current privacy policy version
-  /// - [key]: SharedPreferences storage key
-  ///
-  /// Returns true if user has accepted the exact same privacy policy version
+  /// Check if specific version of privacy policy has been accepted
   static Future<bool> isAcceptedForVersion({
     required String currentPolicyVersion,
     String key = 'app_prviacy_accept_data',
   }) async {
     final prefs = await SharedPreferences.getInstance();
-
-    // Check for versioned acceptance record
     final versionKey = '${key}_version';
     final acceptedVersion = prefs.getString(versionKey);
 
     if (acceptedVersion == null) {
-      // If no version record exists, check legacy boolean acceptance record
-      // Legacy users will be prompted to re-confirm (due to no explicit version record)
       return prefs.getBool(key) ?? false;
     }
 
-    // 🎯 Simple string comparison: versions must be exactly the same to be considered accepted
     return acceptedVersion == currentPolicyVersion;
   }
 
-  /// 🆕 Get the privacy policy version that user has accepted
+  /// Get the privacy policy version that user has accepted
   static Future<String?> getAcceptedVersion({
     String key = 'app_prviacy_accept_data',
   }) async {
@@ -94,15 +121,6 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   /// Determine whether to skip privacy page (do not display)
-  ///
-  /// - region: Current region code (e.g. 'US', 'TW')
-  /// - skipRegionList: List of regions to not display (optional)
-  /// - onlyRegionList: List of regions to only display (optional)
-  ///
-  /// Rules:
-  /// 1. If onlyRegionList is defined, only display in those regions, skip all others
-  /// 2. If skipRegionList is defined, do not display in those regions
-  /// 3. If neither is defined, default to display
   static bool shouldSkipPrivacyPage({
     required String? region,
     List<String>? skipRegionList,
@@ -116,7 +134,7 @@ class PrivacyPolicyPage extends StatelessWidget {
     return false;
   }
 
-  /// Set privacy policy as accepted (legacy API, maintains backward compatibility)
+  /// Set privacy policy as accepted (legacy API)
   static Future<void> setAccepted({
     String key = 'app_prviacy_accept_data',
   }) async {
@@ -124,29 +142,22 @@ class PrivacyPolicyPage extends StatelessWidget {
     await prefs.setBool(key, true);
   }
 
-  /// 🆕 Set specific version of privacy policy as accepted
-  ///
-  /// - [policyVersion]: Accepted privacy policy version
-  /// - [key]: SharedPreferences storage key
+  /// Set specific version of privacy policy as accepted
   static Future<void> setAcceptedForVersion({
     required String policyVersion,
     String key = 'app_prviacy_accept_data',
   }) async {
     final prefs = await SharedPreferences.getInstance();
-
-    // Set both legacy and new records to ensure backward compatibility
     await prefs.setBool(key, true);
 
-    // Record version information
     final versionKey = '${key}_version';
     await prefs.setString(versionKey, policyVersion);
 
-    // Record acceptance timestamp
     final timestampKey = '${key}_accepted_at';
     await prefs.setString(timestampKey, DateTime.now().toIso8601String());
   }
 
-  /// 🆕 Get the time when user accepted privacy policy
+  /// Get the time when user accepted privacy policy
   static Future<DateTime?> getAcceptedAt({
     String key = 'app_prviacy_accept_data',
   }) async {
@@ -165,48 +176,45 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   /// Determine whether to show privacy page
-  ///
-  /// - region: Current region code (e.g. 'US', 'TW')
-  /// - skipRegionList: List of regions to not display (optional)
-  /// - onlyRegionList: List of regions to only display (optional)
-  ///
-  /// Rules:
-  /// 1. If onlyRegionList is defined, only display in those regions
-  /// 2. If skipRegionList is defined, do not display in those regions
-  /// 3. If neither is defined, default to display
   static bool shouldShowPrivacyPage({
     required String? region,
     List<String>? skipRegionList,
     List<String>? onlyRegionList,
   }) {
     if (onlyRegionList != null) {
-      // Only allow display in onlyRegionList regions
       return region != null && onlyRegionList.contains(region);
     }
     if (skipRegionList != null) {
-      // Skip regions in skipRegionList
       return !(region != null && skipRegionList.contains(region));
     }
-    // Default to display
     return true;
   }
 
-  /// Get device country/region code (estimation only, not GPS/IP accurate)
+  /// Get device country/region code (estimation only)
   static Future<String?> getDeviceCountryCode() async {
     try {
-      // Flutter 3.7+ recommends using PlatformDispatcher instead of window
       final locale = ui.PlatformDispatcher.instance.locale;
       return locale.countryCode?.toUpperCase();
     } catch (_) {}
     return null;
   }
 
+  /// Get device locale string (e.g., 'en', 'zh_TW', 'zh_CN')
+  static Future<String> getDeviceLocale() async {
+    try {
+      final locale = ui.PlatformDispatcher.instance.locale;
+      final languageCode = locale.languageCode;
+      final countryCode = locale.countryCode;
+
+      if (countryCode != null && countryCode.isNotEmpty) {
+        return '${languageCode}_$countryCode';
+      }
+      return languageCode;
+    } catch (_) {}
+    return 'en';
+  }
+
   /// Automatically get device region and determine if privacy page should be skipped
-  ///
-  /// - skipRegionList: List of regions to not display (optional)
-  /// - onlyRegionList: List of regions to only display (optional)
-  ///
-  /// Returns true if should skip (not display)
   static Future<bool> shouldSkipPrivacyPageByDevice({
     List<String>? skipRegionList,
     List<String>? onlyRegionList,
@@ -219,9 +227,47 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
+  /// Get the current locale to use for displaying content
+  String _getCurrentLocale(BuildContext context) {
+    if (locale != null) {
+      return locale!;
+    }
+
+    // Try to get from Flutter Localizations
+    try {
+      final deviceLocale = Localizations.localeOf(context);
+      final languageCode = deviceLocale.languageCode;
+      final countryCode = deviceLocale.countryCode;
+
+      if (countryCode != null && countryCode.isNotEmpty) {
+        return '${languageCode}_$countryCode';
+      }
+      return languageCode;
+    } catch (_) {
+      return fallbackLocale;
+    }
+  }
+
+  /// Get the localization to use for UI elements
+  PrivacyPolicyLocalization _getLocalization(BuildContext context) {
+    // If custom localization provided, use it
+    if (localization != null) {
+      return localization!;
+    }
+
+    // Otherwise, get from built-in localizations
+    final currentLocale = _getCurrentLocale(context);
+    return PrivacyPolicyLocalization.getLocalization(
+      currentLocale,
+      fallbackLocale: fallbackLocale,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Region can be determined externally, assuming external logic has already decided
+    final currentLocale = _getCurrentLocale(context);
+    final loc = _getLocalization(context);
+
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
       body: SafeArea(
@@ -239,7 +285,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 16),
                     Text(
-                      titleText ?? 'Privacy Policy',
+                      titleText ?? loc.titleText,
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -253,7 +299,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 8,
@@ -264,40 +310,31 @@ class PrivacyPolicyPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ...policyItems.map(
-                            (item) => Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 6.0),
-                                  child: Icon(
-                                    Icons.brightness_1,
-                                    size: 10,
-                                    color:
-                                        contentTextColor ?? Colors.deepPurple,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    item,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color:
-                                          contentTextColor ?? Colors.grey[800],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          // Render policy items
+                          if (policyItemsHierarchical != null)
+                            ...policyItemsHierarchical!.map(
+                              (item) => _buildPolicyItem(
+                                item,
+                                currentLocale,
+                              ),
+                            )
+                          else if (policyItems != null)
+                            ...policyItems!.map(
+                              (item) => _buildLegacyPolicyItem(item),
                             ),
-                          ),
-                          if (privacyLink != null && privacyTitle != null)
+
+                          // Privacy link
+                          if (privacyLink != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 16.0),
                               child: GestureDetector(
-                                onTap: () => _launchUrl(context, privacyLink!),
+                                onTap: () => _launchUrl(
+                                  context,
+                                  privacyLink!,
+                                  loc,
+                                ),
                                 child: Text(
-                                  privacyTitle!,
+                                  privacyTitle ?? loc.privacyTitle,
                                   style: TextStyle(
                                     color: linkTextColor ?? Colors.blue,
                                     decoration: TextDecoration.underline,
@@ -305,13 +342,19 @@ class PrivacyPolicyPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          if (termsLink != null && termsTitle != null)
+
+                          // Terms link
+                          if (termsLink != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: GestureDetector(
-                                onTap: () => _launchUrl(context, termsLink!),
+                                onTap: () => _launchUrl(
+                                  context,
+                                  termsLink!,
+                                  loc,
+                                ),
                                 child: Text(
-                                  termsTitle!,
+                                  termsTitle ?? loc.termsTitle,
                                   style: TextStyle(
                                     color: linkTextColor ?? Colors.blue,
                                     decoration: TextDecoration.underline,
@@ -341,14 +384,12 @@ class PrivacyPolicyPage extends StatelessWidget {
                       elevation: 0,
                     ),
                     onPressed: () async {
-                      // 🆕 Choose storage method based on whether version info is provided
                       if (policyVersion != null) {
                         await setAcceptedForVersion(
                           policyVersion: policyVersion!,
                           key: sharedPrefKey,
                         );
                       } else {
-                        // Legacy compatibility mode
                         await setAccepted(key: sharedPrefKey);
                       }
 
@@ -358,10 +399,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                         if (Navigator.canPop(context)) {
                           Navigator.of(context).pop(true);
                         }
-                        // If cannot pop, do nothing, let external control handle it
                       }
                     },
-                    child: Text(acceptText),
+                    child: Text(acceptText ?? loc.acceptText),
                   ),
                   OutlinedButton(
                     onPressed: () {
@@ -371,7 +411,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                         Navigator.of(context).pop(false);
                       }
                     },
-                    child: Text(rejectText),
+                    child: Text(rejectText ?? loc.rejectText),
                   ),
                 ],
               ),
@@ -382,10 +422,109 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  void _launchUrl(BuildContext context, String url) {
-    // TODO: Can implement with url_launcher
+  /// Build hierarchical policy item with indentation
+  Widget _buildPolicyItem(
+    PolicyItem item,
+    String locale, {
+    double indent = 0,
+  }) {
+    final text = item.getText(locale, fallbackLocale: fallbackLocale);
+
+    // If text is empty after locale resolution, skip rendering
+    if (text.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: item.hasChildren ? 8.0 : 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: indent),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 6.0),
+                  child: Icon(
+                    item.hasChildren
+                        ? Icons.chevron_right
+                        : Icons.brightness_1,
+                    size: item.hasChildren ? 16 : 8,
+                    color: contentTextColor ?? Colors.deepPurple,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: item.hasChildren
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      color: contentTextColor ?? Colors.grey[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (item.hasChildren)
+            ...item.children!.map(
+              (child) => _buildPolicyItem(
+                child,
+                locale,
+                indent: indent + 20,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Build legacy policy item (backward compatibility)
+  Widget _buildLegacyPolicyItem(String item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 6.0),
+            child: Icon(
+              Icons.brightness_1,
+              size: 8,
+              color: contentTextColor ?? Colors.deepPurple,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              item,
+              style: TextStyle(
+                fontSize: 16,
+                color: contentTextColor ?? Colors.grey[800],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _launchUrl(
+    BuildContext context,
+    String url,
+    PrivacyPolicyLocalization loc,
+  ) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${snackBarOpenLinkText ?? 'Open link'}: $url')),
+      SnackBar(
+        content: Text(
+          '${snackBarOpenLinkText ?? loc.snackBarOpenLinkText}: $url',
+        ),
+      ),
     );
   }
 }

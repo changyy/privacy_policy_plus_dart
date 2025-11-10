@@ -4,6 +4,8 @@
 /// Easily integrate privacy compliance into your app with customizable UI, country-based logic, and quick setup.
 ///
 /// - Show privacy policy and terms consent page with one line of code
+/// - Hierarchical policy items with multi-level indentation
+/// - Multi-language support with automatic locale detection
 /// - Customizable app icon, policy items, and button actions
 /// - Support for privacy/terms links
 /// - Enable/skip by country list (region code)
@@ -12,3 +14,5 @@
 library privacy_policy_plus;
 
 export 'src/privacy_policy_page.dart';
+export 'src/policy_item.dart';
+export 'src/privacy_policy_localization.dart';

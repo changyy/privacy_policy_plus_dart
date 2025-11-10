@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2025-11-10
+### Added
+- **Hierarchical Policy Structure**: New `policyItemsHierarchical` parameter supporting multi-level nested policy items
+- **Multi-Language Support**: Built-in support for 18+ languages with automatic locale detection
+- **PolicyItem Class**: New class for creating hierarchical and multi-language policy content
+  - Support for `Map<String, String>` to provide translations
+  - Convenience constructors: `PolicyItem.single()` and `PolicyItem.localized()`
+  - Automatic fallback to default language when translation not found
+- **PrivacyPolicyLocalization Class**: Built-in UI text translations for:
+  - English, Traditional Chinese, Simplified Chinese, Japanese, Korean
+  - Spanish, French, German, Portuguese, Russian
+  - Arabic, Vietnamese, Thai, Indonesian, Italian
+  - Dutch, Polish, Turkish, Hindi
+- **New Localization Parameters**:
+  - `locale`: Force specific locale (e.g., 'zh_TW', 'ja')
+  - `fallbackLocale`: Set default fallback language (default: 'en')
+  - `localization`: Custom UI text localization
+- **New Methods**:
+  - `getDeviceLocale()`: Get device locale string (e.g., 'zh_TW', 'en')
+  - `PrivacyPolicyLocalization.getLocalization()`: Get localization for specific locale
+
+### Changed
+- **Rendering Engine**: Enhanced to support recursive hierarchical rendering with indentation
+- **UI Improvements**:
+  - Different bullet styles for parent items (chevron) vs leaf items (bullet point)
+  - Bold text for parent items with children
+  - Configurable indentation (20px per level)
+- **API Enhancement**: All legacy parameters still supported for backward compatibility
+
+### Fixed
+- Empty text items are now skipped in rendering when locale not found
+
 ## [1.1.3] - 2025-08-06
 ### Added
 - Text color customization properties for better foreground/background contrast control
