@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'policy_item.dart';
 import 'privacy_policy_localization.dart';
@@ -46,9 +47,15 @@ class PrivacyPolicyPage extends StatelessWidget {
   final String? titleText;
   final String? acceptText;
   final String? rejectText;
+  final String? iosContinueText;
   final String? privacyTitle;
   final String? termsTitle;
   final String? snackBarOpenLinkText;
+
+  // === Platform-specific behavior ===
+  /// When true on iOS, hides the exit/reject button so users always continue
+  /// to the system permission prompt. Has no effect on other platforms.
+  final bool withoutExitButtonWhenIOSPlatform;
 
   const PrivacyPolicyPage({
     Key? key,
@@ -78,9 +85,12 @@ class PrivacyPolicyPage extends StatelessWidget {
     this.titleText,
     this.acceptText,
     this.rejectText,
+    this.iosContinueText,
     this.privacyTitle,
     this.termsTitle,
     this.snackBarOpenLinkText,
+    // Platform-specific behavior
+    this.withoutExitButtonWhenIOSPlatform = false,
   })  : assert(
           policyItems != null || policyItemsHierarchical != null,
           'Either policyItems or policyItemsHierarchical must be provided',
@@ -267,6 +277,11 @@ class PrivacyPolicyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentLocale = _getCurrentLocale(context);
     final loc = _getLocalization(context);
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    final hideSecondaryButton = withoutExitButtonWhenIOSPlatform && isIOS;
+    final primaryButtonLabel = hideSecondaryButton
+        ? (iosContinueText ?? loc.continueText)
+        : (acceptText ?? loc.acceptText);
 
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
@@ -374,47 +389,77 @@ class PrivacyPolicyPage extends StatelessWidget {
                 vertical: 32.0,
                 horizontal: 32.0,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple.shade50,
-                      foregroundColor: Colors.deepPurple,
-                      elevation: 0,
-                    ),
-                    onPressed: () async {
-                      if (policyVersion != null) {
-                        await setAcceptedForVersion(
-                          policyVersion: policyVersion!,
-                          key: sharedPrefKey,
-                        );
-                      } else {
-                        await setAccepted(key: sharedPrefKey);
-                      }
+              child: hideSecondaryButton
+                  ? SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple.shade50,
+                          foregroundColor: Colors.deepPurple,
+                          elevation: 0,
+                        ),
+                        onPressed: () async {
+                          if (policyVersion != null) {
+                            await setAcceptedForVersion(
+                              policyVersion: policyVersion!,
+                              key: sharedPrefKey,
+                            );
+                          } else {
+                            await setAccepted(key: sharedPrefKey);
+                          }
 
-                      if (onAccept != null) {
-                        onAccept!();
-                      } else {
-                        if (Navigator.canPop(context)) {
-                          Navigator.of(context).pop(true);
-                        }
-                      }
-                    },
-                    child: Text(acceptText ?? loc.acceptText),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {
-                      if (onReject != null) {
-                        onReject!();
-                      } else {
-                        Navigator.of(context).pop(false);
-                      }
-                    },
-                    child: Text(rejectText ?? loc.rejectText),
-                  ),
-                ],
-              ),
+                          if (onAccept != null) {
+                            onAccept!();
+                          } else {
+                            if (Navigator.canPop(context)) {
+                              Navigator.of(context).pop(true);
+                            }
+                          }
+                        },
+                        child: Text(primaryButtonLabel),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple.shade50,
+                            foregroundColor: Colors.deepPurple,
+                            elevation: 0,
+                          ),
+                          onPressed: () async {
+                            if (policyVersion != null) {
+                              await setAcceptedForVersion(
+                                policyVersion: policyVersion!,
+                                key: sharedPrefKey,
+                              );
+                            } else {
+                              await setAccepted(key: sharedPrefKey);
+                            }
+
+                            if (onAccept != null) {
+                              onAccept!();
+                            } else {
+                              if (Navigator.canPop(context)) {
+                                Navigator.of(context).pop(true);
+                              }
+                            }
+                          },
+                          child: Text(primaryButtonLabel),
+                        ),
+                        OutlinedButton(
+                          onPressed: () {
+                            if (onReject != null) {
+                              onReject!();
+                            } else {
+                              Navigator.of(context).pop(false);
+                            }
+                          },
+                          child: Text(rejectText ?? loc.rejectText),
+                        ),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -448,9 +493,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 6.0),
                   child: Icon(
-                    item.hasChildren
-                        ? Icons.chevron_right
-                        : Icons.brightness_1,
+                    item.hasChildren ? Icons.chevron_right : Icons.brightness_1,
                     size: item.hasChildren ? 16 : 8,
                     color: contentTextColor ?? Colors.deepPurple,
                   ),

@@ -29,8 +29,7 @@ void main() {
       print('Computed locale string: $computedLocale');
 
       // Check if it matches any built-in localization
-      final hasExactMatch = PrivacyPolicyLocalization
-          .builtInLocalizations
+      final hasExactMatch = PrivacyPolicyLocalization.builtInLocalizations
           .containsKey(computedLocale);
 
       print('Has exact match in builtInLocalizations: $hasExactMatch');
@@ -51,12 +50,12 @@ void main() {
 
     test('Test various locale format variations', () {
       final testCases = [
-        'zh_TW',   // Underscore (current format)
-        'zh-TW',   // Hyphen (BCP 47 format)
-        'zh_tw',   // Lowercase country
-        'zh-tw',   // Hyphen + lowercase
-        'zh',      // Language only
-        'ZH_TW',   // Uppercase language
+        'zh_TW', // Underscore (current format)
+        'zh-TW', // Hyphen (BCP 47 format)
+        'zh_tw', // Lowercase country
+        'zh-tw', // Hyphen + lowercase
+        'zh', // Language only
+        'ZH_TW', // Uppercase language
         'zh_Hant', // Script code
         'en_US',
         'en-US',
@@ -67,8 +66,7 @@ void main() {
       print('\n=== Testing Locale Format Variations ===');
       for (final testLocale in testCases) {
         final loc = PrivacyPolicyLocalization.getLocalization(testLocale);
-        final matched = PrivacyPolicyLocalization
-            .builtInLocalizations
+        final matched = PrivacyPolicyLocalization.builtInLocalizations
             .containsKey(testLocale);
 
         print('$testLocale -> acceptText: ${loc.acceptText} '

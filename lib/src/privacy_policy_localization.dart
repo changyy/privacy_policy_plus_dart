@@ -2,6 +2,7 @@
 class PrivacyPolicyLocalization {
   final String acceptText;
   final String rejectText;
+  final String continueText;
   final String titleText;
   final String snackBarOpenLinkText;
   final String privacyTitle;
@@ -10,6 +11,7 @@ class PrivacyPolicyLocalization {
   const PrivacyPolicyLocalization({
     this.acceptText = 'Accept',
     this.rejectText = 'Reject',
+    this.continueText = 'Continue',
     this.titleText = 'Privacy Policy',
     this.snackBarOpenLinkText = 'Open link',
     this.privacyTitle = 'Privacy Policy',
@@ -21,6 +23,7 @@ class PrivacyPolicyLocalization {
     'en': PrivacyPolicyLocalization(
       acceptText: 'Accept',
       rejectText: 'Reject',
+      continueText: 'Continue',
       titleText: 'Privacy Policy',
       snackBarOpenLinkText: 'Open link',
       privacyTitle: 'Privacy Policy',
@@ -29,6 +32,7 @@ class PrivacyPolicyLocalization {
     'zh_TW': PrivacyPolicyLocalization(
       acceptText: '接受',
       rejectText: '拒絕',
+      continueText: '繼續',
       titleText: '隱私權政策',
       snackBarOpenLinkText: '開啟連結',
       privacyTitle: '隱私權政策',
@@ -37,6 +41,7 @@ class PrivacyPolicyLocalization {
     'zh_CN': PrivacyPolicyLocalization(
       acceptText: '接受',
       rejectText: '拒绝',
+      continueText: '继续',
       titleText: '隐私政策',
       snackBarOpenLinkText: '打开链接',
       privacyTitle: '隐私政策',
@@ -45,6 +50,7 @@ class PrivacyPolicyLocalization {
     'zh': PrivacyPolicyLocalization(
       acceptText: '接受',
       rejectText: '拒绝',
+      continueText: '继续',
       titleText: '隐私政策',
       snackBarOpenLinkText: '打开链接',
       privacyTitle: '隐私政策',
@@ -53,6 +59,7 @@ class PrivacyPolicyLocalization {
     'ja': PrivacyPolicyLocalization(
       acceptText: '同意する',
       rejectText: '拒否',
+      continueText: '続ける',
       titleText: 'プライバシーポリシー',
       snackBarOpenLinkText: 'リンクを開く',
       privacyTitle: 'プライバシーポリシー',
@@ -61,6 +68,7 @@ class PrivacyPolicyLocalization {
     'ko': PrivacyPolicyLocalization(
       acceptText: '동의',
       rejectText: '거부',
+      continueText: '계속',
       titleText: '개인정보 보호정책',
       snackBarOpenLinkText: '링크 열기',
       privacyTitle: '개인정보 보호정책',
@@ -69,6 +77,7 @@ class PrivacyPolicyLocalization {
     'es': PrivacyPolicyLocalization(
       acceptText: 'Aceptar',
       rejectText: 'Rechazar',
+      continueText: 'Continuar',
       titleText: 'Política de Privacidad',
       snackBarOpenLinkText: 'Abrir enlace',
       privacyTitle: 'Política de Privacidad',
@@ -77,6 +86,7 @@ class PrivacyPolicyLocalization {
     'fr': PrivacyPolicyLocalization(
       acceptText: 'Accepter',
       rejectText: 'Refuser',
+      continueText: 'Continuer',
       titleText: 'Politique de Confidentialité',
       snackBarOpenLinkText: 'Ouvrir le lien',
       privacyTitle: 'Politique de Confidentialité',
@@ -85,6 +95,7 @@ class PrivacyPolicyLocalization {
     'de': PrivacyPolicyLocalization(
       acceptText: 'Akzeptieren',
       rejectText: 'Ablehnen',
+      continueText: 'Fortfahren',
       titleText: 'Datenschutzrichtlinie',
       snackBarOpenLinkText: 'Link öffnen',
       privacyTitle: 'Datenschutzrichtlinie',
@@ -93,6 +104,7 @@ class PrivacyPolicyLocalization {
     'pt': PrivacyPolicyLocalization(
       acceptText: 'Aceitar',
       rejectText: 'Rejeitar',
+      continueText: 'Continuar',
       titleText: 'Política de Privacidade',
       snackBarOpenLinkText: 'Abrir link',
       privacyTitle: 'Política de Privacidade',
@@ -101,6 +113,7 @@ class PrivacyPolicyLocalization {
     'ru': PrivacyPolicyLocalization(
       acceptText: 'Принять',
       rejectText: 'Отклонить',
+      continueText: 'Продолжить',
       titleText: 'Политика конфиденциальности',
       snackBarOpenLinkText: 'Открыть ссылку',
       privacyTitle: 'Политика конфиденциальности',
@@ -109,6 +122,7 @@ class PrivacyPolicyLocalization {
     'ar': PrivacyPolicyLocalization(
       acceptText: 'قبول',
       rejectText: 'رفض',
+      continueText: 'متابعة',
       titleText: 'سياسة الخصوصية',
       snackBarOpenLinkText: 'فتح الرابط',
       privacyTitle: 'سياسة الخصوصية',
@@ -117,6 +131,7 @@ class PrivacyPolicyLocalization {
     'vi': PrivacyPolicyLocalization(
       acceptText: 'Chấp nhận',
       rejectText: 'Từ chối',
+      continueText: 'Tiếp tục',
       titleText: 'Chính sách Bảo mật',
       snackBarOpenLinkText: 'Mở liên kết',
       privacyTitle: 'Chính sách Bảo mật',
@@ -125,6 +140,7 @@ class PrivacyPolicyLocalization {
     'th': PrivacyPolicyLocalization(
       acceptText: 'ยอมรับ',
       rejectText: 'ปฏิเสธ',
+      continueText: 'ดำเนินการต่อ',
       titleText: 'นโยบายความเป็นส่วนตัว',
       snackBarOpenLinkText: 'เปิดลิงก์',
       privacyTitle: 'นโยบายความเป็นส่วนตัว',
@@ -133,6 +149,7 @@ class PrivacyPolicyLocalization {
     'id': PrivacyPolicyLocalization(
       acceptText: 'Terima',
       rejectText: 'Tolak',
+      continueText: 'Lanjutkan',
       titleText: 'Kebijakan Privasi',
       snackBarOpenLinkText: 'Buka tautan',
       privacyTitle: 'Kebijakan Privasi',
@@ -141,6 +158,7 @@ class PrivacyPolicyLocalization {
     'it': PrivacyPolicyLocalization(
       acceptText: 'Accetta',
       rejectText: 'Rifiuta',
+      continueText: 'Continua',
       titleText: 'Informativa sulla Privacy',
       snackBarOpenLinkText: 'Apri link',
       privacyTitle: 'Informativa sulla Privacy',
@@ -149,6 +167,7 @@ class PrivacyPolicyLocalization {
     'nl': PrivacyPolicyLocalization(
       acceptText: 'Accepteren',
       rejectText: 'Weigeren',
+      continueText: 'Doorgaan',
       titleText: 'Privacybeleid',
       snackBarOpenLinkText: 'Link openen',
       privacyTitle: 'Privacybeleid',
@@ -157,6 +176,7 @@ class PrivacyPolicyLocalization {
     'pl': PrivacyPolicyLocalization(
       acceptText: 'Akceptuj',
       rejectText: 'Odrzuć',
+      continueText: 'Kontynuuj',
       titleText: 'Polityka Prywatności',
       snackBarOpenLinkText: 'Otwórz link',
       privacyTitle: 'Polityka Prywatności',
@@ -165,6 +185,7 @@ class PrivacyPolicyLocalization {
     'tr': PrivacyPolicyLocalization(
       acceptText: 'Kabul Et',
       rejectText: 'Reddet',
+      continueText: 'Devam Et',
       titleText: 'Gizlilik Politikası',
       snackBarOpenLinkText: 'Bağlantıyı aç',
       privacyTitle: 'Gizlilik Politikası',
@@ -173,6 +194,7 @@ class PrivacyPolicyLocalization {
     'hi': PrivacyPolicyLocalization(
       acceptText: 'स्वीकार करें',
       rejectText: 'अस्वीकार करें',
+      continueText: 'जारी रखें',
       titleText: 'गोपनीयता नीति',
       snackBarOpenLinkText: 'लिंक खोलें',
       privacyTitle: 'गोपनीयता नीति',

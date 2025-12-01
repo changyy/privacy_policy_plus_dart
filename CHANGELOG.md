@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2025-12-01
+### Added
+- iOS-friendly single-CTA mode: `withoutExitButtonWhenIOSPlatform` hides the reject/exit button on iOS so users proceed directly to the system prompt; override the button copy with `iosContinueText`.
+- New `continueText` localization entry (defaults to localized "Continue").
+
 ## [1.2.1] - 2025-11-10
 ### Fixed
 - **Locale Normalization**: Enhanced locale matching to support various format variations

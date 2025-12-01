@@ -120,7 +120,8 @@ class MyApp extends StatelessWidget {
                         'ja': '位置情報 - 位置ベースの機能用',
                       }),
                       PolicyItem({
-                        'en': 'Camera - for scanning QR codes and taking photos',
+                        'en':
+                            'Camera - for scanning QR codes and taking photos',
                         'zh_TW': '相機 - 用於掃描 QR 碼和拍照',
                         'zh_CN': '相机 - 用于扫描二维码和拍照',
                         'ja': 'カメラ - QRコードのスキャンと写真撮影用',
@@ -187,8 +188,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () async {
-                final version =
-                    await PrivacyPolicyPage.getAcceptedVersion();
+                final version = await PrivacyPolicyPage.getAcceptedVersion();
                 final acceptedAt = await PrivacyPolicyPage.getAcceptedAt();
 
                 if (!context.mounted) return;

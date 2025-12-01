@@ -119,6 +119,17 @@ PrivacyPolicyPage(
 )
 ```
 
+### iOS ATT-friendly single button (no exit)
+
+```dart
+PrivacyPolicyPage(
+  policyItemsHierarchical: [...],
+  withoutExitButtonWhenIOSPlatform: true, // hides Reject on iOS
+  iosContinueText: 'Continue', // optional override (defaults to localized "Continue")
+  onAccept: requestTrackingAuthorization,
+)
+```
+
 ### Simple Convenience API
 
 ```dart
@@ -229,6 +240,8 @@ Supported languages (UI elements):
 | `backgroundColor` | `Color?` | Background color |
 | `privacyLink` / `termsLink` | `String?` | External policy links |
 | `onAccept` / `onReject` | `VoidCallback?` | Custom callbacks |
+| `withoutExitButtonWhenIOSPlatform` | `bool` | On iOS, hides the reject/exit button so users always continue to the system prompt (default: false) |
+| `iosContinueText` | `String?` | Override the primary button label when `withoutExitButtonWhenIOSPlatform` is true on iOS (defaults to localized "Continue") |
 
 ### PolicyItem
 
