@@ -6,6 +6,23 @@
 
 A flexible, beautiful, and developer-friendly Flutter widget for displaying privacy policy and consent screens. Easily integrate privacy compliance into your app with customizable UI, country-based logic, and version control.
 
+## Theming
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `backgroundColor` | `Colors.white` | The page background. |
+| `cardColor` | `Colors.white` | The content card. **Set this if your app has a dark theme** — the card used to be hard-coded white, so theme-aware text became invisible on it. |
+| `titleTextColor` | auto | Picked from the background's luminance (black87 on light, white on dark). Pass a colour to override. |
+| `contentTextColor` | `Colors.grey[800]` / `Colors.deepPurple` | Text inside the card — must contrast with `cardColor`. |
+| `linkTextColor` | `Colors.blue` | |
+| `acceptButtonColor` | `Colors.deepPurple.shade50` | |
+| `acceptButtonTextColor` | `Colors.deepPurple` | |
+
+> ⚠️ **The card and the page are separate surfaces.** `contentTextColor` has to
+> contrast with `cardColor`, not with `backgroundColor`. If you only theme the
+> page and let the text follow your `ColorScheme`, a dark theme will paint light
+> text onto the still-white card.
+
 ## Features
 
 - **One-line integration** - Privacy policy and terms consent page with minimal setup

@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-08-07
+### Added
+- `cardColor` — the content card's background. Previously hard-coded to
+  `Colors.white`, which made the page unusable in a dark theme: callers could
+  colour the page background and the text, but the card stayed white, so
+  theme-aware (light) text became invisible on it. **Defaults to white**, so
+  existing apps are unaffected.
+- `acceptButtonColor` / `acceptButtonTextColor` — the accept button was
+  hard-coded to `Colors.deepPurple`, leaving a purple button in apps with any
+  other palette. **Defaults to the previous purple**, so existing apps are
+  unaffected.
+
+### Fixed
+- `titleTextColor` defaulted to `Colors.white`, and the package's own default
+  background is also white — so the title was invisible for any caller that
+  didn't pass a colour. The default is now chosen from the luminance of the
+  background that is actually painted. Explicit values are still honoured.
+
+### Notes
+- The page and the card are **two separate surfaces**: `contentTextColor` must
+  contrast with `cardColor`, while `titleTextColor` contrasts with
+  `backgroundColor`. See the Theming section in the README.
+- 9 widget tests cover the three changes, including regressions that pin the
+  unchanged defaults.
+
 ## [1.2.2] - 2025-12-01
 ### Added
 - iOS-friendly single-CTA mode: `withoutExitButtonWhenIOSPlatform` hides the reject/exit button on iOS so users proceed directly to the system prompt; override the button copy with `iosContinueText`.

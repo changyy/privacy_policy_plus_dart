@@ -26,6 +26,19 @@ class PrivacyPolicyPage extends StatelessWidget {
   final Color? contentTextColor;
   final Color? linkTextColor;
 
+  /// Background of the content card.
+  ///
+  /// Defaults to white. **The card used to be hard-coded white**, which made
+  /// the page unusable for apps with a dark theme: callers could theme the page
+  /// background and the text, but the card stayed white — so theme-aware text
+  /// (light in dark mode) became invisible on it.
+  final Color? cardColor;
+
+  /// Accept button colours. Default to the previous hard-coded deep purple so
+  /// existing apps look unchanged.
+  final Color? acceptButtonColor;
+  final Color? acceptButtonTextColor;
+
   // === Version control mechanism ===
   final String? policyVersion;
 
@@ -75,6 +88,9 @@ class PrivacyPolicyPage extends StatelessWidget {
     this.titleTextColor,
     this.contentTextColor,
     this.linkTextColor,
+    this.cardColor,
+    this.acceptButtonColor,
+    this.acceptButtonTextColor,
     // Version control
     this.policyVersion,
     // Localization
@@ -273,6 +289,21 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
+  /// Title colour when the caller didn't specify one.
+  ///
+  /// The old default was a flat `Colors.white`, which is invisible whenever the
+  /// page background is light — and the package's own default background *is*
+  /// light (`Colors.white`). So the title silently disappeared for anyone who
+  /// didn't pass `titleTextColor`.
+  ///
+  /// Pick by the luminance of the background that will actually be painted,
+  /// so it is readable either way without changing behaviour for callers who
+  /// already pass a colour.
+  Color _autoTitleColor(BuildContext context) {
+    final bg = backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
+    return bg.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentLocale = _getCurrentLocale(context);
@@ -301,18 +332,20 @@ class PrivacyPolicyPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       titleText ?? loc.titleText,
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: titleTextColor ?? Colors.white,
-                              ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: titleTextColor ?? _autoTitleColor(context),
+                          ),
                     ),
                     const SizedBox(height: 24),
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardColor ?? Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: const [
                           BoxShadow(
@@ -394,8 +427,10 @@ class PrivacyPolicyPage extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple.shade50,
-                          foregroundColor: Colors.deepPurple,
+                          backgroundColor:
+                              acceptButtonColor ?? Colors.deepPurple.shade50,
+                          foregroundColor:
+                              acceptButtonTextColor ?? Colors.deepPurple,
                           elevation: 0,
                         ),
                         onPressed: () async {
@@ -424,8 +459,10 @@ class PrivacyPolicyPage extends StatelessWidget {
                       children: [
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple.shade50,
-                            foregroundColor: Colors.deepPurple,
+                            backgroundColor:
+                                acceptButtonColor ?? Colors.deepPurple.shade50,
+                            foregroundColor:
+                                acceptButtonTextColor ?? Colors.deepPurple,
                             elevation: 0,
                           ),
                           onPressed: () async {
