@@ -121,19 +121,22 @@ void _colorApiTests() {
   const items = <String>['We use analytics'];
 
   group('cardColor', () {
-    testWidgets('defaults to white so existing apps are unaffected', (tester) async {
+    testWidgets('defaults to white so existing apps are unaffected',
+        (tester) async {
       await tester.pumpWidget(
         host(const PrivacyPolicyPage(policyItems: items, locale: 'en')),
       );
       await tester.pumpAndSettle();
 
-      final card = tester.widgetList<Container>(find.byType(Container)).firstWhere(
-            (c) => (c.decoration as BoxDecoration?)?.color != null,
-          );
+      final card =
+          tester.widgetList<Container>(find.byType(Container)).firstWhere(
+                (c) => (c.decoration as BoxDecoration?)?.color != null,
+              );
       expect((card.decoration as BoxDecoration).color, Colors.white);
     });
 
-    testWidgets('can be made dark, which is what a dark theme needs', (tester) async {
+    testWidgets('can be made dark, which is what a dark theme needs',
+        (tester) async {
       await tester.pumpWidget(
         host(
           const PrivacyPolicyPage(
@@ -145,13 +148,15 @@ void _colorApiTests() {
       );
       await tester.pumpAndSettle();
 
-      final card = tester.widgetList<Container>(find.byType(Container)).firstWhere(
-            (c) => (c.decoration as BoxDecoration?)?.color != null,
-          );
+      final card =
+          tester.widgetList<Container>(find.byType(Container)).firstWhere(
+                (c) => (c.decoration as BoxDecoration?)?.color != null,
+              );
       expect(
         (card.decoration as BoxDecoration).color,
         const Color(0xFF3A3227),
-        reason: 'a hard-coded white card always collides with dark-theme text colours',
+        reason:
+            'a hard-coded white card always collides with dark-theme text colours',
       );
     });
   });
@@ -160,7 +165,9 @@ void _colorApiTests() {
     Color titleColorOf(WidgetTester tester) =>
         tester.widget<Text>(find.text('Welcome')).style!.color!;
 
-    testWidgets('light background gives a dark title (the old fixed white was invisible)', (tester) async {
+    testWidgets(
+        'light background gives a dark title (the old fixed white was invisible)',
+        (tester) async {
       await tester.pumpWidget(
         host(
           const PrivacyPolicyPage(
@@ -175,7 +182,9 @@ void _colorApiTests() {
       expect(titleColorOf(tester), Colors.black87);
     });
 
-    testWidgets('dark background still gives a white title (unchanged behaviour)', (tester) async {
+    testWidgets(
+        'dark background still gives a white title (unchanged behaviour)',
+        (tester) async {
       await tester.pumpWidget(
         host(
           const PrivacyPolicyPage(
@@ -190,7 +199,8 @@ void _colorApiTests() {
       expect(titleColorOf(tester), Colors.white);
     });
 
-    testWidgets('an explicit colour wins over the automatic choice', (tester) async {
+    testWidgets('an explicit colour wins over the automatic choice',
+        (tester) async {
       await tester.pumpWidget(
         host(
           const PrivacyPolicyPage(
