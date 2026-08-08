@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-08-08
+
+### Fixed
+- **Traditional Chinese devices got a Simplified title and an English body.**
+  Reported from a real device running a Traditional Chinese system language.
+
+  Flutter hands you **script-based** locales, but content maps are keyed by
+  **country**: a Traditional Chinese device resolves to
+  `Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')` — and its
+  **`countryCode` is `null`**. Every locale path in this package looked only at
+  `languageCode` + `countryCode`, so it produced plain `'zh'`, matched no key in
+  a `{en, zh_TW, zh_CN}` map, and fell through to the English fallback.
+
+  Three call sites were wrong, and each failed differently:
+  - `_getCurrentLocale()` dropped the script before matching even started
+  - `PolicyItem.getText()` and `PrivacyPolicyLocalization.getLocalization()`
+    then matched country-only keys
+  - `_normalizeLocale('zh-Hant-CN')` took *first + last* and answered `zh_CN`
+    — backwards; `zh-Hant` alone became the meaningless key `zh_HANT`
+
+  Two rules now govern all of them:
+  1. **Script beats country.** `zh-Hant-CN` is Traditional — the user chose the
+     script; the region only says where they are.
+  2. **Try a candidate chain, not a single key.** `zh_HK` and `zh_MO` reach
+     `zh_TW` before giving up, so Hong Kong and Macau users stop seeing English.
+
+- `getDeviceLocale()` had the same country-only hole and now returns `zh_TW`
+  (not `zh`) on a Traditional Chinese device.
+
+### Added
+- `normalizeLocale()`, `localeCandidates()` and `resolveFromMap()` are exported
+  so apps can resolve their own content maps the same way.
+
+### Notes
+- No API changes; existing callers keep working. Apps that already pass an
+  explicit `locale:` are unaffected either way.
+
 ## [1.3.0] - 2026-08-07
 ### Added
 - `cardColor` — the content card's background. Previously hard-coded to

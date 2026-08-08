@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'locale_resolver.dart';
 import 'policy_item.dart';
 import 'privacy_policy_localization.dart';
 
@@ -226,16 +227,11 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   /// Get device locale string (e.g., 'en', 'zh_TW', 'zh_CN')
+  ///
+  /// Script-aware: a Traditional Chinese device returns `zh_TW`, not `zh`.
   static Future<String> getDeviceLocale() async {
     try {
-      final locale = ui.PlatformDispatcher.instance.locale;
-      final languageCode = locale.languageCode;
-      final countryCode = locale.countryCode;
-
-      if (countryCode != null && countryCode.isNotEmpty) {
-        return '${languageCode}_$countryCode';
-      }
-      return languageCode;
+      return normalizeLocale(_tagOf(ui.PlatformDispatcher.instance.locale));
     } catch (_) {}
     return 'en';
   }
@@ -261,17 +257,25 @@ class PrivacyPolicyPage extends StatelessWidget {
 
     // Try to get from Flutter Localizations
     try {
-      final deviceLocale = Localizations.localeOf(context);
-      final languageCode = deviceLocale.languageCode;
-      final countryCode = deviceLocale.countryCode;
-
-      if (countryCode != null && countryCode.isNotEmpty) {
-        return '${languageCode}_$countryCode';
-      }
-      return languageCode;
+      return _tagOf(Localizations.localeOf(context));
     } catch (_) {
       return fallbackLocale;
     }
+  }
+
+  /// Build a full BCP 47 tag from a Flutter [Locale], **including the script**.
+  ///
+  /// ⚠️ Dropping `scriptCode` here is what shipped the 2026-08-08 bug: a
+  /// Traditional Chinese device is `zh` + `Hant` with a **null countryCode**,
+  /// so country-only code answered plain `'zh'` — which matches no key in a
+  /// `{en, zh_TW, zh_CN}` map, and the page fell back to English.
+  static String _tagOf(Locale locale) {
+    final parts = <String>[locale.languageCode];
+    final script = locale.scriptCode;
+    if (script != null && script.isNotEmpty) parts.add(script);
+    final country = locale.countryCode;
+    if (country != null && country.isNotEmpty) parts.add(country);
+    return parts.join('_');
   }
 
   /// Get the localization to use for UI elements

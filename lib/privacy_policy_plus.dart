@@ -16,3 +16,4 @@ library privacy_policy_plus;
 export 'src/privacy_policy_page.dart';
 export 'src/policy_item.dart';
 export 'src/privacy_policy_localization.dart';
+export 'src/locale_resolver.dart';

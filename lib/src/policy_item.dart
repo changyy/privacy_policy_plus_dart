@@ -1,3 +1,5 @@
+import 'locale_resolver.dart';
+
 /// Represents a privacy policy item that can contain hierarchical content
 /// and multi-language support.
 class PolicyItem {
@@ -38,8 +40,13 @@ class PolicyItem {
   /// - BCP 47 format: zh-TW, en-US → zh_TW, en_US
   /// - Lowercase variants: zh-tw, en-us → zh_TW, en_US
   /// - Mixed case: zh_tw, EN_us → zh_TW, en_US
-  /// - Script codes: zh-Hans-TW → zh_TW (takes first and last part)
   /// - Language only: zh, en → zh, en
+  ///
+  /// **Legacy.** Kept only as a fallback path; matching now goes through
+  /// [normalizeLocale] in `locale_resolver.dart`, which is script-aware.
+  /// This one mishandles script subtags — it takes the first and last part, so
+  /// `zh-Hans-TW` becomes `zh_TW` when Simplified was requested, and `zh-Hant`
+  /// alone becomes the meaningless key `zh_HANT`. Do not add callers.
   ///
   /// Returns normalized locale string in language_COUNTRY format
   static String _normalizeLocale(String locale) {
@@ -83,21 +90,29 @@ class PolicyItem {
     if (text is Map<String, String>) {
       final map = text as Map<String, String>;
 
-      // Normalize the input locale
-      final normalizedLocale = _normalizeLocale(locale);
+      // Script-aware matching with a candidate chain — see locale_resolver.dart.
+      // Doing this by hand here is what produced the 2026-08-08 bug: a
+      // Traditional Chinese device (zh + Hant, **null country**) resolved to
+      // 'zh', matched nothing, and fell through to English.
+      final resolved = resolveFromMap(
+        map,
+        locale,
+        fallbackLocale: fallbackLocale,
+      );
+      if (resolved != null) return resolved;
 
-      // Try exact match first with normalized locale
+      // Legacy fallback paths below (kept so behaviour never regresses for
+      // maps with unusual keys).
+      final normalizedLocale = _normalizeLocale(locale);
       if (map.containsKey(normalizedLocale)) {
         return map[normalizedLocale]!;
       }
 
-      // Try language code only (e.g., 'zh' from 'zh_TW')
       final languageCode = normalizedLocale.split('_').first;
       if (map.containsKey(languageCode)) {
         return map[languageCode]!;
       }
 
-      // Try fallback locale (also normalize it)
       final normalizedFallback = _normalizeLocale(fallbackLocale);
       if (map.containsKey(normalizedFallback)) {
         return map[normalizedFallback]!;

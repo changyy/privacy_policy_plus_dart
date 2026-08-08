@@ -1,3 +1,5 @@
+import 'locale_resolver.dart';
+
 /// Localization configuration for PrivacyPolicyPage UI elements
 class PrivacyPolicyLocalization {
   final String acceptText;
@@ -249,15 +251,22 @@ class PrivacyPolicyLocalization {
     String locale, {
     String fallbackLocale = 'en',
   }) {
-    // Normalize the input locale
-    final normalizedLocale = _normalizeLocale(locale);
+    // Script-aware matching with a candidate chain — see locale_resolver.dart.
+    // The old country-only logic sent Traditional Chinese devices (zh + Hant,
+    // **null country**) to English.
+    final resolved = resolveFromMap(
+      builtInLocalizations,
+      locale,
+      fallbackLocale: fallbackLocale,
+    );
+    if (resolved != null) return resolved;
 
-    // Try exact match first with normalized locale
+    // Legacy fallback paths (kept so nothing regresses).
+    final normalizedLocale = _normalizeLocale(locale);
     if (builtInLocalizations.containsKey(normalizedLocale)) {
       return builtInLocalizations[normalizedLocale]!;
     }
 
-    // Try language code only (e.g., 'zh' from 'zh_TW')
     final languageCode = normalizedLocale.split('_').first;
     if (builtInLocalizations.containsKey(languageCode)) {
       return builtInLocalizations[languageCode]!;
