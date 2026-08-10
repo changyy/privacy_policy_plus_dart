@@ -218,6 +218,45 @@ PrivacyPolicyPage(
 )
 ```
 
+### ⚠️ Wire up `localeResolutionCallback` if your ARB set is script-based
+
+This package resolves whatever locale it is **given**. But by the time a widget
+calls `Localizations.localeOf(context)`, Flutter has already matched the device
+locale against your `supportedLocales` — and that step can throw the script
+away *before this package ever runs*.
+
+With a script-based ARB set (`app_zh_Hant.arb` / `app_zh_Hans.arb`), a device
+reporting `zh_TW` (region, **no script**) has no exact match, so Flutter falls
+back to matching on the language code alone and lands on `Locale('zh')`. If
+`app_zh.arb` happens to be Simplified, **every Traditional Chinese user gets a
+Simplified UI** — and this package then faithfully resolves the bare `zh` it was
+handed to Simplified too. Nothing is broken downstream; the information was
+already gone.
+
+iOS usually reports `zh-Hant-TW` (script present), so this hides on iPhone and
+shows up on **Android**, which commonly reports `zh_TW`.
+
+One line fixes it:
+
+```dart
+MaterialApp(
+  supportedLocales: AppLocalizations.supportedLocales,
+  localeResolutionCallback: resolveSupportedLocale, // ← from this package
+  // …
+)
+```
+
+`resolveSupportedLocale` returns `null` for everything it has no opinion about,
+so Flutter's normal resolution still runs. It only speaks up for Chinese
+locales that carry a region but no script, and it uses the **same** region →
+script rule as `normalizeLocale` (`TW`/`HK`/`MO` → Traditional). It works with
+either ARB style: it prefers a script-based entry and falls back to a
+region-based one.
+
+If your app ships no matching variant it returns `null` rather than guessing —
+a silent downgrade to the wrong script is worse than Flutter's predictable
+fallback.
+
 ### Built-in Language Support
 
 Supported languages (UI elements):

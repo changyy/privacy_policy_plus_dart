@@ -17,3 +17,4 @@ export 'src/privacy_policy_page.dart';
 export 'src/policy_item.dart';
 export 'src/privacy_policy_localization.dart';
 export 'src/locale_resolver.dart';
+export 'src/supported_locale_resolution.dart';

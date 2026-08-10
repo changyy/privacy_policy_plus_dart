@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-08-10
+
+### Added
+- **`resolveSupportedLocale(Locale?, Iterable<Locale>)`** — a
+  `localeResolutionCallback` for `MaterialApp`, covering the step *before* this
+  package's own matching.
+
+  1.4.0 fixed locale resolution **inside** the package. This covers the loss
+  that can happen **upstream of it**: with a script-based ARB set
+  (`app_zh_Hant.arb`), a device reporting `zh_TW` (region, no script) has no
+  exact match in `supportedLocales`, so Flutter falls back to matching on the
+  language code alone and lands on `Locale('zh')`. If `app_zh.arb` is
+  Simplified, every Traditional Chinese user gets a Simplified UI — and this
+  package then resolves the bare `zh` it was handed to Simplified too. Nothing
+  is broken downstream; **the script was already gone**.
+
+  Found while shooting first-launch screenshots in five locales (2026-08-10):
+  the `zh_TW` shot came out Simplified. iOS usually reports `zh-Hant-TW`
+  (script present), so it hides on iPhone and shows up on **Android**, which
+  commonly reports `zh_TW`.
+
+  ```dart
+  MaterialApp(
+    supportedLocales: AppLocalizations.supportedLocales,
+    localeResolutionCallback: resolveSupportedLocale,
+  )
+  ```
+
+  Design notes:
+  - Returns `null` for anything it has no opinion about, so Flutter's normal
+    resolution still runs. It only speaks up for Chinese locales carrying a
+    region but no script.
+  - Uses the **same** region → script rule as `normalizeLocale`
+    (`TW`/`HK`/`MO` → Traditional) — one rule, two shapes, pinned by a test.
+  - Works with either ARB style: prefers a script-based entry, falls back to a
+    region-based one.
+  - Ships no matching variant? Returns `null` instead of guessing. A silent
+    downgrade to the wrong script is worse than a predictable fallback.
+  - Bare `zh` (no region, no script) returns `null` too — there is no signal to
+    act on, and `fallbackLocale` is the right place for that decision.
+
+  17 tests, including the cross-check that it never disagrees with
+  `normalizeLocale`.
+
 ## [1.4.0] - 2026-08-08
 
 ### Fixed
