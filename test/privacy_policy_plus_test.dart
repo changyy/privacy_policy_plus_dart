@@ -238,4 +238,30 @@ void _colorApiTests() {
       expect(bg, const Color(0xFF6B4423));
     });
   });
+
+  group('title layout', () {
+    testWidgets(
+        'a long title wraps centred and stays clear of the screen edges',
+        (tester) async {
+      tester.view.devicePixelRatio = 3.0;
+      tester.view.physicalSize = const Size(440, 956) * 3.0;
+      addTearDown(tester.view.reset);
+      const title = 'Welcome to My Example App: Long Subtitle';
+      await tester.pumpWidget(
+        host(
+          const PrivacyPolicyPage(
+            policyItems: items,
+            locale: 'en',
+            titleText: title,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final text = tester.widget<Text>(find.text(title));
+      expect(text.textAlign, TextAlign.center);
+      final rect = tester.getRect(find.text(title));
+      expect(rect.left, greaterThanOrEqualTo(24));
+      expect(rect.right, lessThanOrEqualTo(440 - 24));
+    });
+  });
 }

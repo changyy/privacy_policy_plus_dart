@@ -334,15 +334,22 @@ class PrivacyPolicyPage extends StatelessWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
-                    Text(
-                      titleText ?? loc.titleText,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: titleTextColor ?? _autoTitleColor(context),
-                          ),
+                    // Horizontal padding + centring: a long title (e.g.
+                    // "Welcome to <long app name>") wraps, and without them
+                    // the wrapped lines run to the screen edge.
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        titleText ?? loc.titleText,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: titleTextColor ?? _autoTitleColor(context),
+                            ),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Container(

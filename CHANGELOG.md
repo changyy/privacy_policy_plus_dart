@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2026-11-04
+
+### Fixed
+- **A long title ran to the left screen edge.** The title (`titleText`) had
+  no horizontal padding and no alignment, so when a long one wrapped to two
+  lines — iPhone portrait, the iPhone Duo cover display — the lines started
+  at x = 0 and were left-aligned under a centred icon. It now has 24pt
+  horizontal padding and `TextAlign.center`. One-line titles look the same as
+  before. Regression test: `title layout` in
+  `test/privacy_policy_plus_test.dart`.
+
 ## [1.5.0] - 2026-08-10
 
 ### Added
